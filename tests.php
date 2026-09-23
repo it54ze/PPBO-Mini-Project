@@ -243,13 +243,18 @@ runSection('P1 - Completable & Task', ['Completable', 'Task'], function (): void
     // Gunakan anonymous class untuk menguji Task secara terisolasi,
     // karena Task sendiri abstract dan butuh implementasi getDetail().
     $makeConcreteTask = function (int $id, string $title) {
-        return new class($id, $title) extends Task {
-            public function getDetail(): string
-            {
-                return $this->getTitle();
-            }
-        };
+    return new class($id, $title) extends Task {
+        public function getDetail(): string
+        {
+            return $this->getTitle();
+        }
+
+        public function getType(): string
+        {
+            return 'Generic';
+        }
     };
+};
 
     $task = $makeConcreteTask(1, 'Belajar PHP OOP');
     checkEquals('getId() mengembalikan id sesuai konstruktor', 1, $task->getId());

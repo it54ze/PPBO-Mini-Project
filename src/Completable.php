@@ -1,7 +1,6 @@
 <?php
 // src/Completable.php
-interface Completable
-{
-    public function markDone(): void;
-    public function isDone(): bool;
+interface Completable {
+    public function complete(): void;
+    public function isCompleted(): bool;
 }

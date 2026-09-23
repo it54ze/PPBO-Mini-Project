@@ -151,11 +151,30 @@ body {
 }
 
 .add-task form {
-    display: grid;
-    grid-template-columns: 1fr 180px 110px;
+    display: flex;
+    flex-wrap: wrap;
     gap: 10px;
 }
 
+.add-task form input[type="text"] {
+    flex: 1 1 200px;
+}
+
+.add-task form select {
+    flex: 0 0 160px;
+}
+
+.add-task form input[type="date"] {
+    flex: 0 0 160px;
+}
+
+.add-task form button {
+    flex: 0 0 130px;
+}
+
+.add-task form select[name="priority"] {
+    flex: 0 0 160px;
+}
 input,
 select {
     width: 100%;

@@ -16,11 +16,9 @@ class DeadlineTask extends Task
     // ditampilkan dan dibandingkan.
     private string $deadline;
 
-    public function __construct(string $title, string $deadline)
+    public function __construct(int $id, string $title, string $deadline)
     {
-        // Wajib panggil constructor parent agar validasi judul (Task)
-        // tetap jalan. Ini contoh nyata parent::__construct().
-        parent::__construct($title);
+        parent::__construct($id, $title);
         $this->setDeadline($deadline);
     }
 
@@ -73,9 +71,7 @@ class DeadlineTask extends Task
 
     public function isOverdue(): bool
     {
-        // Tugas yang sudah selesai tidak dianggap terlambat,
-        // walaupun deadline-nya sudah lewat.
-        if ($this->isDone()) {
+        if ($this->isCompleted()) {
             return false;
         }
 
@@ -90,20 +86,16 @@ class DeadlineTask extends Task
         return 'Deadline';
     }
 
-    // Override getDetail() bawaan Task supaya deadline dan status
-    // TERLAMBAT ikut ditampilkan. Inilah contoh polymorphism yang
-    // dipakai P6 di index.php: satu pemanggilan getDetail(),
-    // hasil berbeda tergantung jenis tugasnya.
     public function getDetail(): string
     {
-        if ($this->isDone()) {
+        if ($this->isCompleted()) {   // sebelumnya: isDone()
             $status = 'Selesai';
         } elseif ($this->isOverdue()) {
             $status = 'TERLAMBAT';
         } else {
             $status = 'Belum selesai';
         }
-
+        
         return sprintf(
             '[%s] %s (deadline: %s) - %s',
             $this->getType(),

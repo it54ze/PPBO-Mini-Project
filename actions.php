@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/bootstrap.php';
 
-$storage = new Storage();
+$storage = new Storage(DATA_FILE);
 $list = $storage->load();
 $action = $_POST['action'] ?? '';
 
@@ -10,29 +10,37 @@ try {
     switch ($action) {
         case 'add':
             $type = $_POST['type'] ?? 'simple';
-            $extra = '';
+            $data = ['title' => $_POST['title'] ?? ''];
+
             if ($type === 'deadline') {
-                $extra = $_POST['deadline'] ?? '';
+                $data['deadline'] = $_POST['deadline'] ?? '';
             } elseif ($type === 'priority') {
-                $extra = $_POST['priority'] ?? '';
+                $data['priority'] = $_POST['priority'] ?? '';
             }
-            $list->add(TaskFactory::create($type, $_POST['title'] ?? '', $extra));
-            $_SESSION['flash'] = ['ok', 'Tugas berhasil ditambahkan.'];
+
+            // TaskFactory::create() sudah otomatis add() ke $list,
+            // jadi TIDAK perlu $list->add(...) lagi di sini.
+            TaskFactory::create($list, $type, $data);
+            flash_set('success', 'Tugas berhasil ditambahkan.');
             break;
 
         case 'done':
             $list->complete((int) ($_POST['id'] ?? 0));
-            $_SESSION['flash'] = ['ok', 'Tugas ditandai selesai.'];
+            flash_set('success', 'Tugas ditandai selesai.');
             break;
 
         case 'delete':
             $list->remove((int) ($_POST['id'] ?? 0));
-            $_SESSION['flash'] = ['ok', 'Tugas dihapus.'];
+            flash_set('success', 'Tugas dihapus.');
             break;
     }
     $storage->save($list);
 } catch (InvalidArgumentException $e) {
-    $_SESSION['flash'] = ['error', $e->getMessage()];
+    // Input tidak valid: judul kosong, format tanggal salah, prioritas tidak dikenal, dll.
+    flash_set('error', $e->getMessage());
+} catch (Exception $e) {
+    // complete()/remove() pada id yang tidak ditemukan.
+    flash_set('error', $e->getMessage());
 }
 
 header('Location: index.php');

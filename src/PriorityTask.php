@@ -9,8 +9,7 @@ class PriorityTask extends Task
 
     public function __construct(int $id, string $title, string $priority)
     {
-        parent::__construct($title);
-        $this->setId($id);
+        parent::__construct($id, $title);
         $this->setPriority($priority);
     }
 
