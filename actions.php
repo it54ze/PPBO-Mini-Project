@@ -34,6 +34,7 @@ try {
             flash_set('success', 'Tugas dihapus.');
             break;
     }
+
     $storage->save($list);
 } catch (InvalidArgumentException $e) {
     // Input tidak valid: judul kosong, format tanggal salah, prioritas tidak dikenal, dll.

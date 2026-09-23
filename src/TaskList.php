@@ -15,6 +15,10 @@ class TaskList
     public function add(Task $task): void
     {
         $this->tasks[$task->getId()] = $task;
+
+        if ($task->getId() > $this->lastId) {
+            $this->lastId = $task->getId();
+        }
     }
 
     public function find(int $id): ?Task

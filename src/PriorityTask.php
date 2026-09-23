@@ -1,6 +1,8 @@
 <?php
 // src/PriorityTask.php
 
+require_once __DIR__ . '/Task.php';
+
 class PriorityTask extends Task
 {
     public const LEVELS = ['Rendah', 'Sedang', 'Tinggi'];
@@ -29,15 +31,13 @@ class PriorityTask extends Task
         $this->priority = $priority;
     }
 
-    // Wajib dari Task (abstract getType())
     public function getType(): string
     {
         return 'priority';
     }
 
-    // Override dari Task (concrete getDetail())
     public function getDetail(): string
     {
-        return 'Prioritas: ' . $this->priority;
+        return sprintf('[%s] %s - Prioritas: %s', $this->getType(), $this->getTitle(), $this->priority);
     }
 }

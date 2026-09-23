@@ -1,5 +1,6 @@
 <?php
 // src/Task.php
+
 abstract class Task implements Completable
 {
     private int $id;
@@ -41,7 +42,7 @@ abstract class Task implements Completable
         return $this->completed;
     }
 
-    // Abstract method: wajib diimplementasikan child class
+    // Abstract: wajib diimplementasikan child class
     abstract public function getType(): string;
     abstract public function getDetail(): string;
 }
