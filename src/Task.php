@@ -1,27 +1,26 @@
 <?php
 // src/Task.php
+
 abstract class Task implements Completable
 {
-    private int $id = 0;
-    private string $title = '';
-    private bool $done = false;
+    private int $id;
+    private string $title;
+    private bool $completed = false;
 
-    public function __construct(string $title)
+    /**
+     * ID diberikan sekali saat konstruksi dan TIDAK BISA diubah lagi
+     * setelahnya -- sengaja tidak ada method setId() sama sekali
+     * (bukan cuma private) supaya immutability-nya benar-benar terjaga.
+     */
+    public function __construct(int $id, string $title)
     {
+        $this->id = $id;
         $this->setTitle($title);
     }
 
     public function getId(): int
     {
         return $this->id;
-    }
-
-    public function setId(int $id): void
-    {
-        if ($this->id !== 0) {
-            throw new LogicException('ID tugas sudah ditetapkan dan tidak boleh diubah.');
-        }
-        $this->id = $id;
     }
 
     public function getTitle(): string
@@ -38,20 +37,20 @@ abstract class Task implements Completable
         $this->title = $title;
     }
 
-    public function markDone(): void
+    public function complete(): void
     {
-        $this->done = true;
+        $this->completed = true;
     }
 
-    public function isDone(): bool
+    public function isCompleted(): bool
     {
-        return $this->done;
+        return $this->completed;
     }
 
-    // Abstract method: wajib diimplementasikan child class
+    // Abstract: wajib diimplementasikan child class
     abstract public function getType(): string;
 
-    // Method konkret: boleh di-override child class
+    // Konkret: boleh di-override child class
     public function getDetail(): string
     {
         return '-';

@@ -244,6 +244,11 @@ runSection('P1 - Completable & Task', ['Completable', 'Task'], function (): void
     // karena Task sendiri abstract dan butuh implementasi getDetail().
     $makeConcreteTask = function (int $id, string $title) {
         return new class($id, $title) extends Task {
+            public function getType(): string
+            {
+                return 'Anonymous';
+            }
+        
             public function getDetail(): string
             {
                 return $this->getTitle();

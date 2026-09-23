@@ -2,6 +2,6 @@
 // src/Completable.php
 interface Completable
 {
-    public function markDone(): void;
-    public function isDone(): bool;
+    public function complete(): void;
+    public function isCompleted(): bool;
 }

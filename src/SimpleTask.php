@@ -1,15 +1,8 @@
 <?php
+// src/SimpleTask.php
 
 require_once __DIR__ . '/Task.php';
 
-/**
- * SimpleTask.php  (Bagian P2)
- * -----------------------------
- * Tugas biasa tanpa deadline dan tanpa prioritas.
- * Contoh paling sederhana dari turunan Task (inheritance),
- * karena tidak butuh property/perilaku tambahan apa pun —
- * cukup memberi tahu jenisnya lewat getType().
- */
 class SimpleTask extends Task
 {
     public function getType(): string
@@ -17,7 +10,13 @@ class SimpleTask extends Task
         return 'Biasa';
     }
 
-    // Tidak perlu override getDetail(): SimpleTask cukup pakai
-    // implementasi default dari Task, karena tidak ada info tambahan
-    // (seperti deadline pada DeadlineTask) yang perlu ditampilkan.
+    public function getDetail(): string
+    {
+        return sprintf(
+            '[%s] %s - %s',
+            $this->getType(),
+            $this->getTitle(),
+            $this->isCompleted() ? 'Selesai' : 'Belum selesai'
+        );
+    }
 }
