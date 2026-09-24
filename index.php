@@ -1,438 +1,186 @@
-<?php 
+<?php
+require_once __DIR__ . '/bootstrap.php';
 
-// ============================================================
-// DATA DUMMY P6
-// Data ini hanya digunakan untuk preview tampilan UI.
-// Nantinya dapat digantikan dengan data dari P1-P5/P7.
-// ============================================================
+$storage = new Storage(DATA_FILE);
+$list = $storage->load();
+$tasks = $list->getAll();
 
-$tasks = [
-    [
-        'id' => 1,
-        'title' => 'Tugas Rekayasa Perangkat Lunak',
-        'detail' => 'Deadline: 3 hari lagi | Kesulitan: Sulit',
-        'type' => 'Tugas Deadline',
-        'done' => false
-    ],
-    [
-        'id' => 2,
-        'title' => 'Tugas Manajemen Rantai Pasok',
-        'detail' => 'Deadline: 5 hari lagi | Kesulitan: Sedang',
-        'type' => 'Tugas Prioritas',
-        'done' => false
-    ],
-    [
-        'id' => 3,
-        'title' => 'Tugas Basis Data',
-        'detail' => 'Deadline: 10 hari lagi | Kesulitan: Mudah',
-        'type' => 'Tugas Sederhana',
-        'done' => true
-    ]
-];
+$successMessage = flash_get('success');
+$errorMessage = flash_get('error');
 
+$today = new DateTime('today');
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deadline Rescue</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>To-Do List OOP</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+<div class="container">
 
-    <div class="container">
+    <div class="navbar">
+        <div class="logo">Tugas<span>Ku</span></div>
+        <div class="profile">P</div>
+    </div>
 
-        <header class="navbar">
+    <div class="hero">
+        <div>
+            <h1>To-Do List</h1>
+            <p><?= count($tasks) ?> tugas · <?= $list->count() > 0 ? count(array_filter($tasks, fn($t) => $t->isCompleted())) : 0 ?> selesai</p>
+        </div>
+        <div class="quote">
+            "Kerjakan yang penting dulu, bukan yang cepat dulu."
+            <small>Mini Project PBO</small>
+        </div>
+    </div>
 
-            <div class="logo">
-                Deadline <span>Rescue</span>
+    <?php if ($successMessage): ?>
+        <div class="alert success"><?= e($successMessage) ?></div>
+    <?php endif; ?>
+
+    <?php if ($errorMessage): ?>
+        <div class="alert error"><?= e($errorMessage) ?></div>
+    <?php endif; ?>
+
+    <div class="dashboard">
+
+        <div>
+            <div class="add-task">
+                <form method="post" action="actions.php">
+                    <input type="hidden" name="action" value="add">
+                    <input type="text" name="title" placeholder="Judul tugas baru..." required>
+
+                    <select name="type" id="type">
+                        <option value="simple">Biasa</option>
+                        <option value="deadline">Deadline</option>
+                        <option value="priority">Prioritas</option>
+                    </select>
+
+                    <input type="date" name="deadline" id="deadline" hidden>
+
+                    <select name="priority" id="priority" hidden>
+                        <?php foreach (PriorityTask::LEVELS as $level): ?>
+                            <option value="<?= e($level) ?>"><?= e($level) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <button type="submit">Tambah Tugas</button>
+                </form>
             </div>
 
-            <div class="profile">
-                ♡
-            </div>
-
-        </header>
-
-
-        <main>
-
-            <section class="hero">
-
-                <div>
-
-                    <h1>
-                        Selamat <span> Datang!</span>
-                    </h1>
-
-                    <p>
-                        Sedikit demi sedikit, tugasmu akan selesai.
-                    </p>
-
+            <div class="task-section">
+                <div class="section-header">
+                    <h2>Daftar Tugas</h2>
+                    <div class="filters">
+                        <button type="button" class="filter active">Semua</button>
+                        <button type="button" class="filter">Belum selesai</button>
+                        <button type="button" class="filter">Selesai</button>
+                    </div>
                 </div>
 
-                <div class="quote">
-                    "Kerjakan hari ini,
-                    <br>
-                    agar esok lebih tenang."
-                </div>
+                <div class="task-list">
+                    <?php foreach ($tasks as $task): ?>
+                        <div class="task-card">
 
-            </section>
+                            <div class="task-check">
+                                <form method="post" action="actions.php">
+                                    <input type="hidden" name="action" value="done">
+                                    <input type="hidden" name="id" value="<?= $task->getId() ?>">
+                                    <?php if ($task->isCompleted()): ?>
+                                        <div class="checkbox checked">✓</div>
+                                    <?php else: ?>
+                                        <button type="submit" class="checkbox" title="Tandai selesai"></button>
+                                    <?php endif; ?>
+                                </form>
+                            </div>
 
+                            <div class="task-info">
+                                <h3 class="<?= $task->isCompleted() ? 'completed' : '' ?>">
+                                    <?= e($task->getTitle()) ?>
+                                </h3>
+                                <p><?= e($task->getDetail()) ?></p>
+                            </div>
 
-            <div class="dashboard">
+                            <div>
+                                <?php if ($task instanceof DeadlineTask): ?>
+                                    <span class="badge deadline">Tugas Deadline</span>
+                                <?php elseif ($task instanceof PriorityTask): ?>
+                                    <span class="badge priority">Tugas Prioritas</span>
+                                <?php else: ?>
+                                    <span class="badge simple">Tugas Sederhana</span>
+                                <?php endif; ?>
+                            </div>
 
-                <div class="main-content">
-
-
-                    <section class="add-task">
-
-                        <form>
-
-                            <input
-                                type="text"
-                                name="title"
-                                placeholder="Tambah tugas baru..."
-                            >
-
-                            <select name="type">
-
-                                <option value="simple">
-                                    Tugas Sederhana
-                                </option>
-
-                                <option value="deadline">
-                                    Tugas Deadline
-                                </option>
-
-                                <option value="priority">
-                                    Tugas Prioritas
-                                </option>
-
-                            </select>
-
-                            <button type="submit">
-                                Tambah
-                            </button>
-
-                        </form>
-
-                    </section>
-
-
-
-                    <section class="task-section">
-
-                        <div class="section-header">
-
-                            <h2>
-                                Daftar Tugas
-                            </h2>
-
-                            <div class="filters">
-
-                                <button class="filter active">
-                                    Semua
-                                </button>
-
-                                <button class="filter">
-                                    Belum Selesai
-                                </button>
-
-                                <button class="filter">
-                                    Selesai
-                                </button>
-
+                            <div class="task-action">
+                                <form method="post" action="actions.php">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id" value="<?= $task->getId() ?>">
+                                    <button type="submit" class="icon-button delete" title="Hapus tugas">×</button>
+                                </form>
                             </div>
 
                         </div>
+                    <?php endforeach; ?>
 
-
-
-                        <div class="task-list">
-
-                            <?php foreach ($tasks as $task): ?>
-
-                                <div class="task-card">
-
-
-                                    <!-- P1 - POSISI KODE P1
-                                         Status task nantinya berasal
-                                         dari method isDone() pada Task.
-                                    -->
-
-                                    <div class="task-check">
-
-                                        <?php if ($task['done']): ?>
-
-                                            <div class="checkbox checked">
-                                                ✓
-                                            </div>
-
-                                        <?php else: ?>
-
-                                            <div class="checkbox"></div>
-
-                                        <?php endif; ?>
-
-                                    </div>
-
-
-
-                                    <!-- P1 - POSISI KODE P1
-                                         getTitle() dari object Task
-                                         nantinya digunakan di bagian ini.
-                                    -->
-
-                                    <div class="task-info">
-
-                                        <h3 class="<?= $task['done'] ? 'completed' : '' ?>">
-
-                                            <?= htmlspecialchars(
-                                                $task['title'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>
-
-                                        </h3>
-
-
-
-                                        <!-- P6 - POSISI POLYMORPHISM
-                                             getDetail() dari object Task
-                                             nantinya ditampilkan di sini.
-
-                                             P2/P3:
-                                             SimpleTask, DeadlineTask, dan
-                                             PriorityTask memiliki implementasi
-                                             getDetail() masing-masing.
-                                        -->
-
-                                        <p>
-
-                                            <?= htmlspecialchars(
-                                                $task['detail'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>
-
-                                        </p>
-
-                                    </div>
-
-
-
-                                    <!-- P2/P3 - POSISI KODE
-                                         Jenis task nantinya berasal dari
-                                         object Task, bukan data dummy.
-                                    -->
-
-                                    <div>
-
-                                        <?php if ($task['type'] === 'Tugas Deadline'): ?>
-
-                                            <span class="badge deadline">
-                                                Tugas Deadline
-                                            </span>
-
-                                        <?php elseif ($task['type'] === 'Tugas Prioritas'): ?>
-
-                                            <span class="badge priority">
-                                                Tugas Prioritas
-                                            </span>
-
-                                        <?php else: ?>
-
-                                            <span class="badge simple">
-                                                Tugas Sederhana
-                                            </span>
-
-                                        <?php endif; ?>
-
-                                    </div>
-
-
-
-                                    <!-- P5 - POSISI KODE P5
-                                         actions.php nantinya terhubung
-                                         dengan tombol aksi task di sini.
-                                    -->
-
-                                    <div class="task-action">
-
-                                        <button
-                                            type="button"
-                                            class="icon-button"
-                                            title="Edit tugas"
-                                        >
-                                            ✎
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            class="icon-button delete"
-                                            title="Hapus tugas"
-                                        >
-                                            ×
-                                        </button>
-
-                                    </div>
-
-
-                                </div>
-
-                            <?php endforeach; ?>
-
-                        </div>
-
-                    </section>
-
+                    <?php if (count($tasks) === 0): ?>
+                        <div class="empty-task">Belum ada tugas. Tambahkan yang pertama di atas.</div>
+                    <?php endif; ?>
                 </div>
-
-
-
-                <aside class="calendar">
-
-                    <div class="calendar-header">
-
-                        <button type="button">
-                            ‹
-                        </button>
-
-                        <h3>
-                            September 2026
-                        </h3>
-
-                        <button type="button">
-                            ›
-                        </button>
-
-                    </div>
-
-
-                    <div class="calendar-week">
-
-                        <span>Min</span>
-                        <span>Sen</span>
-                        <span>Sel</span>
-                        <span>Rab</span>
-                        <span>Kam</span>
-                        <span>Jum</span>
-                        <span>Sab</span>
-
-                    </div>
-
-
-                    <div class="calendar-days">
-
-                        <span></span>
-                        <span></span>
-                        <span>1</span>
-                        <span>2</span>
-                        <span>3</span>
-                        <span>4</span>
-                        <span>5</span>
-
-                        <span>6</span>
-                        <span>7</span>
-                        <span>8</span>
-                        <span>9</span>
-                        <span>10</span>
-                        <span>11</span>
-                        <span>12</span>
-
-                        <span>13</span>
-                        <span>14</span>
-                        <span>15</span>
-                        <span>16</span>
-                        <span>17</span>
-                        <span>18</span>
-                        <span>19</span>
-
-                        <span>20</span>
-                        <span>21</span>
-
-                        <span class="today">
-                            22
-                        </span>
-
-                        <span>23</span>
-                        <span>24</span>
-                        <span>25</span>
-                        <span>26</span>
-
-                        <span>27</span>
-                        <span>28</span>
-                        <span>29</span>
-                        <span>30</span>
-
-                    </div>
-
-
-                    <div class="calendar-info">
-
-                        <strong>
-                            Tugas Terdekat
-                        </strong>
-
-                        <p>
-                            Tugas Rekayasa Perangkat Lunak
-                        </p>
-
-                        <small>
-                            Deadline 25 September
-                        </small>
-
-                    </div>
-
-                </aside>
-
             </div>
+        </div>
 
-        </main>
-
-
-
-        <footer>
-
-            <div>
-
-                <strong>
-                    Deadline Rescue
-                </strong>
-
-                <p>
-                    Atur tugasmu sebelum deadline.
-                </p>
-
+        <div class="calendar">
+            <div class="calendar-header">
+                <button type="button">‹</button>
+                <h3><?= $today->format('F Y') ?></h3>
+                <button type="button">›</button>
             </div>
-
-
-            <div class="footer-links">
-
-                <span>
-                    Bantuan
-                </span>
-
-                <span>|</span>
-
-                <span>
-                    Kontak
-                </span>
-
-                <span>|</span>
-
-                <span>
-                    2026
-                </span>
-
+            <div class="calendar-week">
+                <span>M</span><span>S</span><span>S</span><span>R</span><span>K</span><span>J</span><span>S</span>
             </div>
+            <div class="calendar-days">
+                <?php
+                $daysInMonth = (int) $today->format('t');
+                for ($d = 1; $d <= $daysInMonth; $d++):
+                ?>
+                    <span class="<?= $d === (int) $today->format('j') ? 'today' : '' ?>"><?= $d ?></span>
+                <?php endfor; ?>
+            </div>
+            <div class="calendar-info">
+                <strong>Ringkasan</strong>
+                <p><?= $list->count() ?> total tugas</p>
+                <small>Kalender ini masih dekoratif, belum terhubung ke deadline tugas.</small>
+            </div>
+        </div>
 
-        </footer>
+    </div>
 
+    <footer>
+        <div>
+            <strong>To-Do List OOP</strong>
+            <p>Mini Project Praktikum PBO</p>
+        </div>
+        <div class="footer-links">
+            <span>PHP · OOP</span>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+    const type = document.getElementById('type');
+    function toggleExtra() {
+        document.getElementById('deadline').hidden = type.value !== 'deadline';
+        document.getElementById('priority').hidden = type.value !== 'priority';
+    }
+    type.addEventListener('change', toggleExtra);
+    toggleExtra();
+</script>
+</body>
+</html>
 
     </div>
 
