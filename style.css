@@ -668,3 +668,18 @@ footer p {
         margin-top: 12px;
     }
 }
+
+/* ============================================================
+   TANDA DEADLINE PADA KALENDER
+   ============================================================ */
+
+.calendar-days .deadline-day {
+    border: 2px solid #e98ab2;
+    border-radius: 50%;
+    font-weight: 600;
+}
+
+.calendar-days .today.deadline-day {
+    background-color: #e98ab2;
+    color: white;
+}
