@@ -9,6 +9,9 @@ abstract class Task implements Completable
 
     public function __construct(int $id, string $title)
     {
+        if ($id <= 0) {
+            throw new InvalidArgumentException('ID tugas harus berupa angka positif.');
+        }
         $this->id = $id;
         $this->setTitle($title);
     }
